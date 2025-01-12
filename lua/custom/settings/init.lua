@@ -10,10 +10,20 @@ vim.g.have_nerd_font = false
 -- Escape from insert mode by typing 'jk'
 vim.api.nvim_set_keymap('i', 'jk', '<Esc>', { noremap = true })
 
--- Share the Neovim clipboard with the system clipboard
-vim.schedule(function()
+-- Set clipboard to use system clipboard on startup
+vim.opt.clipboard = 'unnamedplus'
+
+-- Ensure clipboard is set correctly after plugins load
+vim.defer_fn(function()
   vim.opt.clipboard = 'unnamedplus'
-end)
+end, 100)
+
+-- Re-apply clipboard setting when focusing Neovim or entering a buffer
+vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
+  callback = function()
+    vim.opt.clipboard = 'unnamedplus'
+  end,
+})
 
 -- Make line numbers default
 vim.opt.number = true
