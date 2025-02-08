@@ -96,6 +96,14 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
+vim.g.vimwiki_list = {
+  {
+    path = '~/vimwiki/',
+    syntax = 'markdown',
+    ext = '.md',
+  },
+}
+
 -- Keymaps for better default experience
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
