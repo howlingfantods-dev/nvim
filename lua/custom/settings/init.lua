@@ -93,6 +93,8 @@ vim.opt.cursorline = true
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+vim.keymap.set('n', '<leader>c', ':CsvViewToggle<CR>', { noremap = true, silent = true })
+
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
