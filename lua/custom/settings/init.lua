@@ -94,6 +94,7 @@ vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 vim.keymap.set('n', '<leader>c', ':CsvViewToggle<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>g', ':Goyo<CR>', { noremap = true, silent = true })
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
