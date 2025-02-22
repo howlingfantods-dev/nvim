@@ -25,6 +25,10 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
   end,
 })
 
+vim.cmd [[
+  nnoremap gf :e <C-R>=substitute(expand("<cfile>"), '^file:', '', '')<CR><CR>
+]]
+
 -- Make line numbers default
 vim.opt.number = true
 -- Enable relative line numbers
