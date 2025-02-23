@@ -29,6 +29,12 @@ vim.cmd [[
   nnoremap gf :e <C-R>=substitute(expand("<cfile>"), '^file:', '', '')<CR><CR>
 ]]
 
+vim.keymap.set('n', '<leader>dt', function()
+  vim.api.nvim_put({ os.date '%Y-%m-%d %H:%M:%S' }, 'c', true, true)
+end, { noremap = true, silent = true })
+
+vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
+
 -- Make line numbers default
 vim.opt.number = true
 -- Enable relative line numbers
