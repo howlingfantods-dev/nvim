@@ -35,6 +35,12 @@ end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
 
+vim.keymap.set('n', '<leader>sl', function()
+  local buf_dir = vim.fn.expand '%:p:h' -- Get the directory of the current buffer
+  vim.cmd 'new | setlocal buftype=nofile'
+  vim.cmd 'terminal' -- Open a new terminal buffer
+  vim.api.nvim_chan_send(vim.b.terminal_job_id, 'cd ' .. buf_dir .. ' && clear\n') -- Change directory in terminal
+end, { noremap = true, silent = true })
 -- Make line numbers default
 vim.opt.number = true
 -- Enable relative line numbers
