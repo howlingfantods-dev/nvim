@@ -71,6 +71,15 @@ vim.keymap.set('n', '<leader>rr', function()
   print 'Neovim config fully reloaded!'
 end, { noremap = true, silent = true })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function()
+    if vim.fn.expand '%:p' == '~/vimwiki/index.md' then
+      vim.b.noharperls = true
+    end
+  end,
+})
+
 -- Make line numbers default
 vim.opt.number = true
 -- Enable relative line numbers
