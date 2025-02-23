@@ -35,7 +35,7 @@ end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
 
-vim.keymap.set('n', '<leader>sl', function()
+vim.keymap.set('n', '<leader>h', function()
   local buf_dir = vim.fn.expand '%:p:h' -- Get current buffer directory
   local buf = vim.api.nvim_create_buf(false, true) -- Create a new unlisted buffer
 
