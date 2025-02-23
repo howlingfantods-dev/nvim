@@ -61,6 +61,16 @@ vim.keymap.set('n', '<leader>sl', function()
   vim.cmd 'startinsert' -- Enter insert mode immediately
 end, { noremap = true, silent = true })
 
+vim.keymap.set('n', '<leader>rr', function()
+  for name, _ in pairs(package.loaded) do
+    if name:match '^my_config' then -- Adjust this prefix to match your Lua modules
+      package.loaded[name] = nil
+    end
+  end
+  vim.cmd 'source $MYVIMRC'
+  print 'Neovim config fully reloaded!'
+end, { noremap = true, silent = true })
+
 -- Make line numbers default
 vim.opt.number = true
 -- Enable relative line numbers
