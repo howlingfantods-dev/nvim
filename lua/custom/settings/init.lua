@@ -35,58 +35,6 @@ end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
 
-vim.keymap.set('n', '<leader>h', function()
-  local buf_dir = vim.fn.expand '%:p:h' -- Get current buffer directory
-  local buf = vim.api.nvim_create_buf(false, true) -- Create a new unlisted buffer
-
-  -- Get Neovim UI dimensions
-  local width = math.floor(vim.o.columns * 0.8) -- 80% of the window width
-  local height = math.floor(vim.o.lines * 0.8) -- 80% of the window height
-  local row = math.floor((vim.o.lines - height) / 2) -- Center vertically
-  local col = math.floor((vim.o.columns - width) / 2) -- Center horizontally
-
-  -- Create the floating window
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
-    width = width,
-    height = height,
-    row = row,
-    col = col,
-    style = 'minimal',
-    border = 'rounded', -- Use 'single', 'double', 'rounded', 'solid', etc.
-  })
-
-  -- Start a terminal inside the floating window
-  vim.fn.termopen(vim.o.shell, { cwd = buf_dir }) -- Set terminal's working directory
-  vim.cmd 'startinsert' -- Enter insert mode immediately
-end, { noremap = true, silent = true })
-
-vim.keymap.set('n', '<leader>sh', function()
-  local buf_dir = vim.fn.expand '$HOME' -- Get current buffer directory
-  local buf = vim.api.nvim_create_buf(false, true) -- Create a new unlisted buffer
-
-  -- Get Neovim UI dimensions
-  local width = math.floor(vim.o.columns * 0.8) -- 80% of the window width
-  local height = math.floor(vim.o.lines * 0.8) -- 80% of the window height
-  local row = math.floor((vim.o.lines - height) / 2) -- Center vertically
-  local col = math.floor((vim.o.columns - width) / 2) -- Center horizontally
-
-  -- Create the floating window
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
-    width = width,
-    height = height,
-    row = row,
-    col = col,
-    style = 'minimal',
-    border = 'rounded', -- Use 'single', 'double', 'rounded', 'solid', etc.
-  })
-
-  -- Start a terminal inside the floating window
-  vim.fn.termopen(vim.o.shell, { cwd = buf_dir }) -- Set terminal's working directory
-  vim.cmd 'startinsert' -- Enter insert mode immediately
-end, { noremap = true, silent = true })
-
 vim.keymap.set('n', '<leader>rr', function()
   for name, _ in pairs(package.loaded) do
     if name:match '^my_config' then -- Adjust this prefix to match your Lua modules
