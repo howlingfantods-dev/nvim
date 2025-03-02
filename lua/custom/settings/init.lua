@@ -25,9 +25,76 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
   end,
 })
 
-vim.cmd [[
-  nnoremap gf :e <C-R>=substitute(expand("<cfile>"), '^file:', '', '')<CR><CR>
-]]
+-- Function to open file or URL under cursor, with improved cursor position awareness
+function OpenFileOrURL()
+  -- Get cursor position and current line
+  local line = vim.fn.getline '.'
+  local col = vim.fn.col '.'
+  local line_to_cursor = string.sub(line, 1, col)
+  local cursor_to_end = string.sub(line, col)
+
+  -- Function to find item at cursor in CSV
+  local function getItemAtCursor()
+    local items = {}
+    -- Split line by commas, considering quotes
+    for item in string.gmatch(line .. ',', '([^,]*),') do
+      table.insert(items, item)
+    end
+
+    local pos = 1
+    for i, item in ipairs(items) do
+      local item_end = pos + #item
+      -- If cursor position is within this item's range
+      if col >= pos and col <= item_end then
+        return item:gsub('^%s*(.-)%s*$', '%1') -- Trim whitespace
+      end
+      pos = item_end + 1 -- +1 for the comma
+    end
+    return nil
+  end
+
+  -- Get the item where cursor is positioned
+  local item = getItemAtCursor()
+  if not item then
+    return
+  end
+
+  -- Check if it's a URL
+  if string.match(item, '^https?://') or string.match(item, '^www%.') then
+    local url = item
+    if string.match(url, '^www%.') then
+      url = 'http://' .. url
+    end
+
+    local open_cmd
+    if vim.fn.has 'mac' == 1 then
+      open_cmd = 'open'
+    elseif vim.fn.has 'unix' == 1 then
+      open_cmd = 'xdg-open'
+    elseif vim.fn.has 'win32' == 1 then
+      open_cmd = 'start ""'
+    end
+
+    vim.fn.system(open_cmd .. ' ' .. vim.fn.shellescape(url))
+    return
+  end
+
+  -- Check for file: pattern
+  if string.match(item, '^file:') then
+    local actual_path = string.gsub(item, '^file:', '')
+    vim.cmd('edit ' .. vim.fn.fnameescape(actual_path))
+    return
+  end
+
+  -- If none of the above matched, use the default gf behavior
+  vim.cmd 'normal! gf'
+end
+
+-- Override the gf key with our custom function
+vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
+
+-- Override the gf key with our custom function
+vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>dt', function()
   vim.api.nvim_put({ os.date '%Y-%m-%d %H:%M:%S' }, 'c', true, true)
@@ -51,6 +118,13 @@ vim.api.nvim_create_autocmd('FileType', {
     if vim.fn.expand '%:p' == '~/vimwiki/index.md' then
       vim.b.noharperls = true
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+  pattern = '*/vimwiki/School/main.cpp',
+  callback = function()
+    vim.fn.system('cp ' .. vim.fn.expand '%:p' .. ' ~/vimwiki/School/main.txt')
   end,
 })
 
