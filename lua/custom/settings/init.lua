@@ -97,7 +97,7 @@ vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true,
 vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>dt', function()
-  vim.api.nvim_put({ os.date '%Y-%m-%d %H:%M:%S' }, 'c', true, true)
+  vim.api.nvim_put({ os.date '%Y-%m-%d' }, 'c', true, true)
 end, { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
@@ -112,12 +112,11 @@ vim.keymap.set('n', '<leader>rr', function()
   print 'Neovim config fully reloaded!'
 end, { noremap = true, silent = true })
 
+vim.g.harper_disabled = true
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'markdown',
   callback = function()
-    if vim.fn.expand '%:p' == '~/vimwiki/index.md' then
-      vim.b.noharperls = true
-    end
+    vim.b.noharperls = false
   end,
 })
 

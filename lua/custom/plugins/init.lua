@@ -11,6 +11,13 @@ return {
     end,
   },
   {
+    'windwp/nvim-ts-autotag',
+    ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+    config = function()
+      require('nvim-ts-autotag').setup()
+    end,
+  },
+  {
     'jay-babu/mason-nvim-dap.nvim',
     event = 'VeryLazy',
     dependencies = {
