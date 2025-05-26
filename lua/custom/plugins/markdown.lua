@@ -1,4 +1,23 @@
 return {
+
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
+  {
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    ft = { 'markdown' },
+    build = function()
+      vim.fn['mkdp#util#install']()
+    end,
+  },
+
   {
     'vimwiki/vimwiki',
     lazy = false, -- Load immediately
@@ -11,11 +30,21 @@ return {
         },
       }
       vim.g.vimwiki_global_ext = 0 -- Prevent conflicts with other markdown plugins
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'vimwiki',
+        callback = function()
+          vim.keymap.set('n', '<CR>', function()
+            local line = vim.api.nvim_get_current_line()
+            local file_path = line:match 'file:([^)]+)'
+            if file_path and file_path:match '^~/' then
+              vim.cmd('edit ' .. file_path)
+            else
+              vim.cmd 'VimwikiFollowLink'
+            end
+          end, { buffer = true })
+        end,
+      })
     end,
-  },
-  {
-    'junegunn/goyo.vim',
-    cmd = 'Goyo',
   },
   {
     'reedes/vim-pencil',
@@ -26,21 +55,6 @@ return {
       vim.cmd 'autocmd!'
       vim.cmd 'autocmd FileType markdown,text,tex call pencil#init()'
       vim.cmd 'augroup END'
-    end,
-  },
-  --  [markdown markmap]
-  --  https://github.com/Zeioth/markmap.nvim
-  {
-    'Zeioth/markmap.nvim',
-    build = 'yarn global add markmap-cli',
-    cmd = { 'MarkmapOpen', 'MarkmapSave', 'MarkmapWatch', 'MarkmapWatchStop' },
-    opts = {
-      html_output = '/tmp/markmap.html', -- (default) Setting a empty string "" here means: [Current buffer path].html
-      hide_toolbar = false, -- (default)
-      grace_period = 3600000, -- (default) Stops markmap watch after 60 minutes. Set it to 0 to disable the grace_period.
-    },
-    config = function(_, opts)
-      require('markmap').setup(opts)
     end,
   },
 }

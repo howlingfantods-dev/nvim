@@ -152,15 +152,15 @@ require('lazy').setup({
       },
 
       -- Document existing key chains
-      spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-      },
+      -- spec = {
+      --   { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
+      --   { '<leader>d', group = '[D]ocument' },
+      --   { '<leader>r', group = '[R]ename' },
+      --   { '<leader>s', group = '[S]earch' },
+      --   { '<leader>w', group = '[W]orkspace' },
+      --   { '<leader>t', group = '[T]oggle' },
+      --   { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+      -- },
     },
   },
 
@@ -511,13 +511,13 @@ require('lazy').setup({
       }
     end,
   },
-{
-	"L3MON4D3/LuaSnip",
-	-- follow latest release.
-	version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-	-- install jsregexp (optional!).
-	build = "make install_jsregexp"
-},
+  {
+    'L3MON4D3/LuaSnip',
+    -- follow latest release.
+    version = 'v2.*', -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+    -- install jsregexp (optional!).
+    build = 'make install_jsregexp',
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
