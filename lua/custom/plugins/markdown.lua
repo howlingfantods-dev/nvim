@@ -1,51 +1,36 @@
 return {
+  'obsidian-nvim/obsidian.nvim',
+  version = '*', -- recommended, use latest release instead of latest commit
+  lazy = true,
+  ft = 'markdown',
+  -- Replace the above line with this if you only want to load obsidian.nvim for markdown files in your vault:
+  -- event = {
+  --   -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
+  --   -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/*.md"
+  --   -- refer to `:h file-pattern` for more examples
+  --   "BufReadPre path/to/my-vault/*.md",
+  --   "BufNewFile path/to/my-vault/*.md",
+  -- },
+  dependencies = {
+    -- Required.
+    'nvim-lua/plenary.nvim',
 
-  {
-    'iamcco/markdown-preview.nvim',
-    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-    ft = { 'markdown' },
-    build = function()
-      vim.fn['mkdp#util#install']()
-    end,
+    -- see above for full list of optional dependencies ☝️
   },
+  ---@module 'obsidian'
+  ---@type obsidian.config
+  opts = {
+    workspaces = {
+      {
+        name = 'personal',
+        path = '~/vaults/personal',
+      },
+      {
+        name = 'work',
+        path = '~/vaults/public',
+      },
+    },
 
-  {
-    'vimwiki/vimwiki',
-    lazy = false, -- Load immediately
-    config = function()
-      vim.g.vimwiki_list = {
-        {
-          path = '~/vimwiki/', -- Change this to your preferred location
-          syntax = 'markdown', -- Default is wiki syntax, change to 'markdown' if needed
-          ext = '.md', -- Use .md for markdown files
-        },
-      }
-      vim.g.vimwiki_global_ext = 0 -- Prevent conflicts with other markdown plugins
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'vimwiki',
-        callback = function()
-          vim.keymap.set('n', '<CR>', function()
-            local line = vim.api.nvim_get_current_line()
-            local file_path = line:match 'file:([^)]+)'
-            if file_path and file_path:match '^~/' then
-              vim.cmd('edit ' .. file_path)
-            else
-              vim.cmd 'VimwikiFollowLink'
-            end
-          end, { buffer = true })
-        end,
-      })
-    end,
-  },
-  {
-    'reedes/vim-pencil',
-    config = function()
-      vim.cmd 'let g:pencil#autoformat = 1' -- Enable auto formatting
-      vim.cmd "let g:pencil#wrapModeDefault = 'soft'" -- Soft wrap text
-      vim.cmd 'augroup pencil'
-      vim.cmd 'autocmd!'
-      vim.cmd 'autocmd FileType markdown,text,tex call pencil#init()'
-      vim.cmd 'augroup END'
-    end,
+    -- see below for full list of options 👇
   },
 }

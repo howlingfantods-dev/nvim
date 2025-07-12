@@ -13,6 +13,8 @@ vim.api.nvim_set_keymap('i', 'jk', '<Esc>', { noremap = true })
 -- Set clipboard to use system clipboard on startup
 vim.opt.clipboard = 'unnamedplus'
 
+vim.opt.conceallevel = 1
+
 -- Ensure clipboard is set correctly after plugins load
 vim.defer_fn(function()
   vim.opt.clipboard = 'unnamedplus'
@@ -24,71 +26,6 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
     vim.opt.clipboard = 'unnamedplus'
   end,
 })
-
--- Function to open file or URL under cursor, with improved cursor position awareness
-function OpenFileOrURL()
-  -- Get cursor position and current line
-  local line = vim.fn.getline '.'
-  local col = vim.fn.col '.'
-  local line_to_cursor = string.sub(line, 1, col)
-  local cursor_to_end = string.sub(line, col)
-
-  -- Function to find item at cursor in CSV
-  local function getItemAtCursor()
-    local items = {}
-    -- Split line by commas, considering quotes
-    for item in string.gmatch(line .. ',', '([^,]*),') do
-      table.insert(items, item)
-    end
-
-    local pos = 1
-    for i, item in ipairs(items) do
-      local item_end = pos + #item
-      -- If cursor position is within this item's range
-      if col >= pos and col <= item_end then
-        return item:gsub('^%s*(.-)%s*$', '%1') -- Trim whitespace
-      end
-      pos = item_end + 1 -- +1 for the comma
-    end
-    return nil
-  end
-
-  -- Get the item where cursor is positioned
-  local item = getItemAtCursor()
-  if not item then
-    return
-  end
-
-  -- Check if it's a URL
-  if string.match(item, '^https?://') or string.match(item, '^www%.') then
-    local url = item
-    if string.match(url, '^www%.') then
-      url = 'http://' .. url
-    end
-
-    local open_cmd
-    if vim.fn.has 'mac' == 1 then
-      open_cmd = 'open'
-    elseif vim.fn.has 'unix' == 1 then
-      open_cmd = 'xdg-open'
-    elseif vim.fn.has 'win32' == 1 then
-      open_cmd = 'start ""'
-    end
-
-    vim.fn.system(open_cmd .. ' ' .. vim.fn.shellescape(url))
-    return
-  end
-
-  -- Check for file: pattern
-  if string.match(item, '^file:') then
-    local actual_path = string.gsub(item, '^file:', '')
-    vim.cmd('edit ' .. vim.fn.fnameescape(actual_path))
-    return
-  end
-
-  -- If none of the above matched, use the default gf behavior
-  vim.cmd 'normal! gf'
-end
 
 -- Override the gf key with our custom function
 vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
@@ -111,14 +48,6 @@ vim.keymap.set('n', '<leader>rr', function()
   vim.cmd 'source $MYVIMRC'
   print 'Neovim config fully reloaded!'
 end, { noremap = true, silent = true })
-
-vim.g.harper_disabled = true
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'markdown',
-  callback = function()
-    vim.b.noharperls = false
-  end,
-})
 
 vim.api.nvim_create_autocmd('BufWritePost', {
   pattern = '*/vimwiki/School/main.cpp',
@@ -201,14 +130,6 @@ vim.keymap.set('n', '<leader>g', ':Goyo<CR>', { noremap = true, silent = true })
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
-vim.g.vimwiki_list = {
-  {
-    path = '~/vimwiki/',
-    syntax = 'markdown',
-    ext = '.md',
-  },
-}
-
 -- Keymaps for better default experience
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
@@ -237,11 +158,82 @@ vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('n', 'Q', '<nop>')
 vim.keymap.set('n', 'q', '<nop>')
 
--- Disable Copilot with <leader>x
-vim.keymap.set('n', '<leader>x', ':Copilot disable<CR>', { noremap = true, silent = true })
-
 -- Disable nvim suspension
 vim.api.nvim_set_keymap('n', '<C-z>', '<Nop>', { noremap = true, silent = true })
 
 -- Set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
+
+-- Create a directory for your definitions if it doesn't exist
+local definitions_dir = vim.fn.expand '~/Books/definitions/'
+vim.fn.mkdir(definitions_dir, 'p')
+
+-- dict look up
+function show_dict_definition()
+  -- Get the word under the cursor
+  local word = vim.fn.expand '<cword>'
+
+  if word == '' then
+    print 'No word under cursor'
+    return
+  end
+
+  -- Run the dict command and capture output
+  local cmd = 'dict ' .. vim.fn.shellescape(word)
+  local output = vim.fn.system(cmd)
+
+  -- Check if command was successful
+  if vim.v.shell_error ~= 0 then
+    print('Dict command failed or no definition found for: ' .. word)
+    return
+  end
+
+  -- Split output into lines
+  local lines = vim.split(output, '\n')
+
+  -- Create floating window
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+  -- Window dimensions
+  local width = math.floor(vim.o.columns * 0.8)
+  local height = math.floor(vim.o.lines * 0.7)
+  local row = math.floor((vim.o.lines - height) / 2)
+  local col = math.floor((vim.o.columns - width) / 2)
+
+  local opts = {
+    relative = 'editor',
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = 'minimal',
+    border = 'rounded',
+    title = ' Dictionary: ' .. word .. ' ',
+    title_pos = 'center',
+  }
+
+  local win = vim.api.nvim_open_win(buf, true, opts)
+
+  -- Set up close keymap
+  vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '', {
+    callback = function()
+      vim.api.nvim_win_close(win, true)
+    end,
+    noremap = true,
+    silent = true,
+  })
+
+  vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '', {
+    callback = function()
+      vim.api.nvim_win_close(win, true)
+    end,
+    noremap = true,
+    silent = true,
+  })
+end
+
+-- Set up the keymap
+vim.keymap.set('n', '<leader>d', show_dict_definition, {
+  desc = 'Show dictionary definition for word under cursor',
+})
