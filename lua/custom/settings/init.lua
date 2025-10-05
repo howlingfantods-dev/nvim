@@ -237,3 +237,9 @@ end
 vim.keymap.set('n', '<leader>d', show_dict_definition, {
   desc = 'Show dictionary definition for word under cursor',
 })
+
+vim.keymap.set('n', '<leader>wr', ':set wrap!<CR>', { noremap = true, silent = true })
+
+vim.keymap.set('n', '<leader>td', function()
+  vim.cmd('edit ' .. vim.fn.expand '~/.todo.md')
+end, { noremap = true, silent = true, desc = 'Open todo.md' })
