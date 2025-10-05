@@ -391,7 +391,6 @@ require('lazy').setup({
       local servers = {
         -- gopls = {},
         rust_analyzer = {},
-        pyright = {},
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
