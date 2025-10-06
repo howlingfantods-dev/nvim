@@ -1,47 +1,62 @@
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+-- =============================
+-- 🌙  Custom Neovim Settings
+-- =============================
+
+-- ----- Leader Keys -----
+-- Set <Space> as the main leader key and local leader key.
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Set to true if you have a Nerd Font installed and selected in the terminal
+-- ----- General Keymaps -----
+-- Clear search highlights with <Esc> in normal mode.
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Diagnostic shortcuts.
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>r', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+
+-- Indicate whether Nerd Fonts are available (used by some plugins).
 vim.g.have_nerd_font = false
 
--- Escape from insert mode by typing 'jk'
+-- Exit insert mode quickly by typing 'jk'.
 vim.api.nvim_set_keymap('i', 'jk', '<Esc>', { noremap = true })
 
--- Set clipboard to use system clipboard on startup
+-- ----- Clipboard Integration -----
+-- Use the system clipboard for all yank, delete, paste operations.
 vim.opt.clipboard = 'unnamedplus'
 
-vim.opt.conceallevel = 1
-
--- Ensure clipboard is set correctly after plugins load
+-- Ensure clipboard integration persists even after startup delay or focus regain.
 vim.defer_fn(function()
   vim.opt.clipboard = 'unnamedplus'
 end, 100)
 
--- Re-apply clipboard setting when focusing Neovim or entering a buffer
 vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
   callback = function()
     vim.opt.clipboard = 'unnamedplus'
   end,
 })
 
--- Override the gf key with our custom function
+-- ----- Text Display -----
+-- Controls how concealed text (like markdown links) is displayed.
+vim.opt.conceallevel = 1
+
+-- ----- Custom "gf" Behavior -----
+-- Map 'gf' to open URLs or local files (you likely have OpenFileOrURL() defined elsewhere).
 vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
 
--- Override the gf key with our custom function
-vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
-
+-- ----- Utility Keymaps -----
+-- Insert current date at cursor.
 vim.keymap.set('n', '<leader>dt', function()
   vim.api.nvim_put({ os.date '%Y-%m-%d' }, 'c', true, true)
 end, { noremap = true, silent = true })
 
+-- Change current working directory to current file's folder.
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>', { noremap = true, silent = true })
 
+-- Reload the entire Neovim config live without restarting.
 vim.keymap.set('n', '<leader>rr', function()
   for name, _ in pairs(package.loaded) do
-    if name:match '^my_config' then -- Adjust this prefix to match your Lua modules
+    if name:match '^my_config' then
       package.loaded[name] = nil
     end
   end
@@ -49,153 +64,85 @@ vim.keymap.set('n', '<leader>rr', function()
   print 'Neovim config fully reloaded!'
 end, { noremap = true, silent = true })
 
-vim.api.nvim_create_autocmd('BufWritePost', {
-  pattern = '*/vimwiki/School/main.cpp',
-  callback = function()
-    vim.fn.system('cp ' .. vim.fn.expand '%:p' .. ' ~/vimwiki/School/main.txt')
-  end,
-})
-
--- Make line numbers default
-vim.opt.number = true
--- Enable relative line numbers
--- You can also add relative line numbers, to help with jumping.
-vim.opt.relativenumber = true
-
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
-
--- Don't show the mode, since it's already in the status line
-vim.opt.showmode = false
-
--- Enable break indent
-vim.opt.breakindent = true
-
--- Save undo history
-vim.opt.undofile = true
-
--- Case-insensitive searching UNLESS \C or capital in search
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-
--- Highlight matches as you type during search
-vim.opt.incsearch = true
-
--- Do not highlight all matches after search
-vim.opt.hlsearch = false
-
--- Decrease update time
-vim.opt.updatetime = 250
-
--- Set delay time for triggering plugins and showing messages in milliseconds
-vim.opt.timeoutlen = 300
-
--- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-
--- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
-
--- Minimal number of screen lines to keep above and below the cursor
-vim.opt.scrolloff = 18
-
--- Set the number of spaces a tab character represents
-vim.opt.tabstop = 4
--- Set the number of spaces inserted for a tab in insert mode
-vim.opt.softtabstop = 4
--- Convert tabs to spaces
-vim.opt.expandtab = true
--- Set the number of spaces to use for each step of (auto)indent
-vim.opt.shiftwidth = 2
--- Set the maximum width of text before it wraps
-vim.opt.textwidth = 80
-
--- Display a vertical line at column 80 as a guide
-vim.opt.colorcolumn = '80'
-
--- Set completeopt to have a better completion experience
-vim.opt.completeopt = 'menuone,noselect'
-
--- Show which line your cursor is on
-vim.opt.cursorline = true
-
--- Sets how neovim will display certain whitespace characters in the editor.
-vim.opt.list = true
+-- ----- UI & Behavior Settings -----
+vim.opt.number = true -- Show line numbers.
+vim.opt.relativenumber = true -- Relative line numbers for easy movement.
+vim.opt.mouse = 'a' -- Enable mouse in all modes.
+vim.opt.showmode = false -- Don't show "-- INSERT --" since statusline usually does.
+vim.opt.breakindent = true -- Preserve indent when wrapping lines.
+vim.opt.undofile = true -- Persistent undo between sessions.
+vim.opt.ignorecase = true -- Case-insensitive searching...
+vim.opt.smartcase = true -- ...unless capital letters are used.
+vim.opt.incsearch = true -- Show matches while typing.
+vim.opt.hlsearch = false -- Don't highlight matches after search ends.
+vim.opt.updatetime = 250 -- Faster diagnostics updates.
+vim.opt.timeoutlen = 300 -- Shorter mapping timeout.
+vim.opt.splitright = true -- Open vertical splits to the right.
+vim.opt.splitbelow = true -- Open horizontal splits below.
+vim.opt.signcolumn = 'yes' -- Always show the sign column (no text shift).
+vim.opt.scrolloff = 18 -- Keep 18 lines of context above/below cursor.
+vim.opt.tabstop = 4 -- Display tabs as 4 spaces.
+vim.opt.softtabstop = 4 -- Insert 4 spaces per <Tab>.
+vim.opt.expandtab = true -- Use spaces instead of tabs.
+vim.opt.shiftwidth = 2 -- Indent with 2 spaces.
+vim.opt.textwidth = 80 -- Line wrap limit.
+vim.opt.colorcolumn = '80' -- Draw a vertical line at column 80.
+vim.opt.completeopt = 'menuone,noselect' -- Better completion behavior.
+vim.opt.cursorline = true -- Highlight current line.
+vim.opt.list = true -- Show invisible characters.
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
-vim.keymap.set('n', '<leader>c', ':CsvViewToggle<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>g', ':Goyo<CR>', { noremap = true, silent = true })
+-- ----- Plugin-Specific Shortcuts -----
+vim.keymap.set('n', '<leader>c', ':CsvViewToggle<CR>', { noremap = true, silent = true }) -- Toggle CSV view plugin.
+vim.opt.inccommand = 'split' -- Live preview for substitute (:%s).
 
--- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
+-- ----- Navigation Quality of Life -----
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true }) -- Prevent accidental leader trigger.
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true }) -- Move up visual lines.
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true }) -- Move down visual lines.
 
--- Keymaps for better default experience
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+-- Disable bracket-based motions (useful if you map them elsewhere).
+for _, key in ipairs { '{', '}', '[', ']' } do
+  vim.api.nvim_set_keymap('n', key, '<Nop>', { noremap = true, silent = true })
+  vim.api.nvim_set_keymap('v', key, '<Nop>', { noremap = true, silent = true })
+end
 
--- Remap for dealing with word wrap
-vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-
--- Disable curly braces key mappings
-vim.api.nvim_set_keymap('n', '{', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '}', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '{', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '}', '<Nop>', { noremap = true, silent = true })
-
--- Disable square brackets key mappings
-vim.api.nvim_set_keymap('n', '[', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', ']', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '[', '<Nop>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', ']', '<Nop>', { noremap = true, silent = true })
-
--- Move selected lines down with 'J' in visual mode
+-- Move selected lines up and down in visual mode.
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
--- Move selected lines up with 'K' in visual mode
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 
--- Disable the 'Q' and 'q' commands in normal mode (Ex mode)
+-- Disable recording and suspend keys.
 vim.keymap.set('n', 'Q', '<nop>')
 vim.keymap.set('n', 'q', '<nop>')
-
--- Disable nvim suspension
 vim.api.nvim_set_keymap('n', '<C-z>', '<Nop>', { noremap = true, silent = true })
 
--- Set termguicolors to enable highlight groups
+-- Enable full color support.
 vim.opt.termguicolors = true
 
--- Create a directory for your definitions if it doesn't exist
-local definitions_dir = vim.fn.expand '~/Books/definitions/'
-vim.fn.mkdir(definitions_dir, 'p')
+-- =============================
+-- 📘  Dictionary Popup Function
+-- =============================
 
--- dict look up
+-- Function: Show definition of word under cursor using `dict` command.
 function show_dict_definition()
-  -- Get the word under the cursor
   local word = vim.fn.expand '<cword>'
-
   if word == '' then
     print 'No word under cursor'
     return
   end
 
-  -- Run the dict command and capture output
+  -- Run `dict` CLI command to fetch definition.
   local cmd = 'dict ' .. vim.fn.shellescape(word)
   local output = vim.fn.system(cmd)
-
-  -- Check if command was successful
   if vim.v.shell_error ~= 0 then
     print('Dict command failed or no definition found for: ' .. word)
     return
   end
 
-  -- Split output into lines
+  -- Display definition in a centered floating window.
   local lines = vim.split(output, '\n')
-
-  -- Create floating window
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-
-  -- Window dimensions
   local width = math.floor(vim.o.columns * 0.8)
   local height = math.floor(vim.o.lines * 0.7)
   local row = math.floor((vim.o.lines - height) / 2)
@@ -215,31 +162,37 @@ function show_dict_definition()
 
   local win = vim.api.nvim_open_win(buf, true, opts)
 
-  -- Set up close keymap
-  vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '', {
-    callback = function()
-      vim.api.nvim_win_close(win, true)
-    end,
-    noremap = true,
-    silent = true,
-  })
-
-  vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '', {
-    callback = function()
-      vim.api.nvim_win_close(win, true)
-    end,
-    noremap = true,
-    silent = true,
-  })
+  -- Close popup with 'q' or <Esc>.
+  for _, key in ipairs { 'q', '<Esc>' } do
+    vim.api.nvim_buf_set_keymap(buf, 'n', key, '', {
+      callback = function()
+        vim.api.nvim_win_close(win, true)
+      end,
+      noremap = true,
+      silent = true,
+    })
+  end
 end
 
--- Set up the keymap
+-- Keymap to trigger dictionary lookup.
 vim.keymap.set('n', '<leader>d', show_dict_definition, {
   desc = 'Show dictionary definition for word under cursor',
 })
 
+-- ----- Misc Keymaps -----
+-- Toggle line wrapping.
 vim.keymap.set('n', '<leader>wr', ':set wrap!<CR>', { noremap = true, silent = true })
 
+-- Open your main TODO file.
 vim.keymap.set('n', '<leader>td', function()
   vim.cmd('edit ' .. vim.fn.expand '~/.todo.md')
 end, { noremap = true, silent = true, desc = 'Open todo.md' })
+
+-- Highlight text momentarily after yanking.
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})

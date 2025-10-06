@@ -11,7 +11,6 @@ ls.add_snippets('javascript', {
   }),
 })
 
--- Also add for TypeScript
 ls.add_snippets('typescript', {
   s('clg', {
     t 'console.log(',
@@ -20,7 +19,6 @@ ls.add_snippets('typescript', {
   }),
 })
 
--- Add for JSX/TSX files too
 ls.add_snippets('javascriptreact', {
   s('clg', {
     t 'console.log(',
