@@ -12,6 +12,6 @@ return {
   cmd = 'Neotree',
   keys = {
     -- Toggle Neo-tree with <leader>e
-    { '<leader>e', ':Neotree toggle<CR>', desc = 'Toggle NeoTree', silent = true },
+    -- { '<leader>e', ':Neotree toggle<CR>', desc = 'Toggle NeoTree', silent = true },
   },
 }

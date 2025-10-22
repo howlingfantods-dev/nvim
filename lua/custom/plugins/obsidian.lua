@@ -1,88 +1,9 @@
-vim.keymap.set('n', '<leader>nn', ':Obsidian new_from_template<CR>', { desc = 'New note from template' })
+vim.keymap.set('n', '<leader>nn', ':bsidian new_from_template<CR>', { desc = 'New note from template' })
 
 vim.keymap.set('n', '<leader>na', ':Obsidian tags active<CR>', { desc = 'Find active notes' })
 vim.keymap.set('n', '<leader>ww', function()
   vim.cmd 'ObsidianQuickSwitch Main'
 end, { desc = 'Quick switch to Main' })
-
--- local function jump_to_or_create_todo()
---   local client = require('obsidian').get_client()
---
---   -- Search for notes with "Todo" alias using the vault search
---   local found_note = nil
---
---   -- Get all notes in the vault
---   local notes = client:find_notes ''
---
---   -- Look for a note with "Todo" alias
---   for _, note in ipairs(notes) do
---     if note.aliases then
---       for _, alias in ipairs(note.aliases) do
---         if alias == 'Todo' then
---           found_note = note
---           break
---         end
---       end
---     end
---     if found_note then
---       break
---     end
---   end
---
---   if found_note then
---     -- Jump to the todo note
---     vim.cmd('edit ' .. tostring(found_note.path))
---   else
---     -- No todo note found, create one
---     vim.cmd 'ObsidianTemplate todo'
---
---     -- Add the metadata after template loads
---     vim.defer_fn(function()
---       local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
---       local new_lines = {}
---       local in_frontmatter = false
---       local frontmatter_end = 0
---
---       -- Find existing frontmatter or create it
---       for i, line in ipairs(lines) do
---         if i == 1 and line == '---' then
---           in_frontmatter = true
---           table.insert(new_lines, line)
---         elseif in_frontmatter and line == '---' then
---           -- Insert our metadata before closing frontmatter
---           table.insert(new_lines, 'aliases: [Todo]')
---           table.insert(new_lines, 'tags: [active]')
---           table.insert(new_lines, line)
---           frontmatter_end = i
---           break
---         elseif in_frontmatter then
---           table.insert(new_lines, line)
---         end
---       end
---
---       -- If no frontmatter exists, create it
---       if not in_frontmatter then
---         new_lines = {
---           '---',
---           'aliases: [Todo]',
---           'tags: [active]',
---           '---',
---           '',
---         }
---         frontmatter_end = 5
---       end
---
---       -- Add the rest of the content
---       for i = frontmatter_end + 1, #lines do
---         table.insert(new_lines, lines[i])
---       end
---
---       vim.api.nvim_buf_set_lines(0, 0, -1, false, new_lines)
---     end, 100)
---   end
--- end
---
--- vim.keymap.set('n', '<leader>td', jump_to_or_create_todo, { desc = 'Jump to or create Todo' })
 
 local function create_leetcode_problem()
   -- Prompt for problem number
@@ -184,6 +105,10 @@ return {
         name = 'writing-and-reading',
         path = '~/Vaults/writing-and-reading/',
       },
+      {
+        name = 'arketa-notes',
+        path = '/Volumes/Development/arketa-notes',
+      },
     },
 
     templates = {
@@ -210,11 +135,9 @@ return {
       -- Define how various check-boxes are displayed
       checkboxes = {
         -- NOTE: the 'char' value has to be a single character, and the highlight groups are defined below.
-        [' '] = { char = '󰄱', hl_group = 'ObsidianTodo' },
-        ['x'] = { char = '', hl_group = 'ObsidianDone' },
-        ['>'] = { char = '', hl_group = 'ObsidianRightArrow' },
-        ['~'] = { char = '󰰱', hl_group = 'ObsidianTilde' },
-        ['!'] = { char = '', hl_group = 'ObsidianImportant' },
+        checkbox = {
+          order = { ' ', '/', 'x' }, -- defines the toggle cycle: unchecked → in-progress → done
+        },
         -- Replace the above with this if you don't have a patched font:
         -- [" "] = { char = "☐", hl_group = "ObsidianTodo" },
         -- ["x"] = { char = "✔", hl_group = "ObsidianDone" },

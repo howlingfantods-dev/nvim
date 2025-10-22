@@ -36,6 +36,10 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
   end,
 })
 
+-- <leader>zs → open ~/.zshrc in a new tab
+vim.keymap.set('n', '<leader>zs', function()
+  vim.cmd('tabedit ' .. vim.fn.expand '$HOME/.zshrc')
+end, { desc = 'Open ~/.zshrc' })
 -- ----- Text Display -----
 -- Controls how concealed text (like markdown links) is displayed.
 vim.opt.conceallevel = 1
@@ -185,7 +189,7 @@ vim.keymap.set('n', '<leader>wr', ':set wrap!<CR>', { noremap = true, silent = t
 
 -- Open your main TODO file.
 vim.keymap.set('n', '<leader>td', function()
-  vim.cmd('edit ' .. vim.fn.expand '~/.todo.md')
+  vim.cmd('edit ' .. vim.fn.expand '/Volumes/Development/arketa-notes/.todo.md')
 end, { noremap = true, silent = true, desc = 'Open todo.md' })
 
 -- Highlight text momentarily after yanking.
