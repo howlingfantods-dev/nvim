@@ -10,20 +10,25 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- Automatically open Yazi when nvim is launched with a directory
+-- If nvim is opened with a directory, open Yazi instead
 vim.api.nvim_create_autocmd('VimEnter', {
   callback = function(data)
-    local directory = vim.fn.isdirectory(data.file) == 1
-    if not directory then
+    local dir = data.file
+    if vim.fn.isdirectory(dir) == 0 then
       return
     end
 
-    -- Prevent opening the directory buffer
-    vim.cmd.enew()
-    vim.cmd.bdelete(1)
+    -- Change cwd to that directory
+    vim.cmd.cd(vim.fn.fnameescape(dir))
 
-    -- Launch Yazi
-    vim.cmd 'Yazi'
+    -- Wipe all buffers so we don't see an empty one
+    vim.cmd 'silent! %bwipeout'
+
+    -- Open Yazi directly
+    vim.cmd 'Yazi cwd'
+
+    -- Prevent further autocmds from interfering
+    vim.cmd 'doautocmd User YaziLaunch'
   end,
 })
 
@@ -124,13 +129,12 @@ require('lazy').setup({
   ---@type LazySpec
   {
     'mikavilpas/yazi.nvim',
-    version = '*', -- use the latest stable version
+    version = '*',
     event = 'VeryLazy',
     dependencies = {
       { 'nvim-lua/plenary.nvim', lazy = true },
     },
     keys = {
-      -- 👇 in this section, choose your own keymappings!
       {
         '<leader>-',
         mode = { 'n', 'v' },
@@ -138,30 +142,31 @@ require('lazy').setup({
         desc = 'Open yazi at the current file',
       },
       {
-        -- Open in the current working directory
-        '<leader>ya',
-        '<cmd>Yazi cwd<cr>',
-        desc = "Open the file manager in nvim's working directory",
-      },
-      {
-        '<c-up>',
-        '<cmd>Yazi toggle<cr>',
-        desc = 'Resume the last yazi session',
+        '<leader>e',
+        function()
+          -- If Yazi is open, quit it (like pressing q)
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            local buf = vim.api.nvim_win_get_buf(win)
+            local ft = vim.bo[buf].filetype
+            if ft == 'yazi' then
+              vim.api.nvim_win_close(win, true)
+              return
+            end
+          end
+
+          -- Otherwise, open Yazi in the cwd
+          vim.cmd 'Yazi cwd'
+        end,
+        desc = "Open Yazi or quit it (acts like 'q')",
       },
     },
-    ---@type YaziConfig | {}
     opts = {
-      -- if you want to open yazi instead of netrw, see below for more info
       open_for_directories = false,
       keymaps = {
         show_help = '<f1>',
       },
     },
-    -- 👇 if you use `open_for_directories=true`, this is recommended
     init = function()
-      -- mark netrw as loaded so it's not loaded at all.
-      --
-      -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
       vim.g.loaded_netrwPlugin = 1
     end,
   },
