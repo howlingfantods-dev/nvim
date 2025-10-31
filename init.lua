@@ -263,12 +263,66 @@ require('lazy').setup({
             },
           },
         },
+        pyright = {
+          capabilities = capabilities,
+          settings = {
+            python = {
+              analysis = {
+                typeCheckingMode = 'basic',
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+              },
+            },
+          },
+        },
       }
 
-      -- Define/extend configs using the new API
-      for name, conf in pairs(servers) do
-        vim.lsp.config(name, conf)
-      end
+      -- Optional servers (only loaded if manually installed via :MasonInstall)
+      -- Uncomment and move to 'servers' table above if you have the required toolchains
+      local optional_servers = {
+        gopls = {
+          capabilities = capabilities,
+          settings = {
+            gopls = {
+              analyses = {
+                unusedparams = true,
+              },
+              staticcheck = true,
+              gofumpt = true,
+            },
+          },
+        },
+        clangd = {
+          capabilities = capabilities,
+          cmd = {
+            'clangd',
+            '--background-index',
+            '--clang-tidy',
+            '--header-insertion=iwyu',
+            '--completion-style=detailed',
+            '--function-arg-placeholders',
+          },
+        },
+        jdtls = {
+          capabilities = capabilities,
+          settings = {
+            java = {
+              signatureHelp = { enabled = true },
+              contentProvider = { preferred = 'fernflower' },
+              completion = {
+                favoriteStaticMembers = {
+                  'org.junit.Assert.*',
+                  'org.junit.jupiter.api.Assertions.*',
+                  'org.mockito.Mockito.*',
+                },
+              },
+            },
+          },
+        },
+      }
+
+      -- Merge optional servers into handlers (they'll work if manually installed)
+      local all_servers = vim.tbl_extend('force', {}, servers, optional_servers)
 
       -- Mason setup and ensure tools are present
       require('mason').setup()
@@ -278,20 +332,43 @@ require('lazy').setup({
         table.insert(ensure_installed, name)
       end
       -- Formatters/linters managed by mason-tool-installer
-      vim.list_extend(ensure_installed, { 'stylua' })
+      vim.list_extend(ensure_installed, {
+        'stylua',
+        'eslint_d',
+        'prettier',
+        'prettierd',
+        'pylint',
+        'ruff',
+        'isort',
+        -- Optional formatters (uncomment if you have the toolchains):
+        -- 'gofumpt',      -- requires Go
+        -- 'goimports',    -- requires Go
+        -- 'clang-format', -- requires C++ toolchain
+        -- 'google-java-format', -- requires Java
+      })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       -- mason-lspconfig: install LSPs and (optionally) auto-enable them
       require('mason-lspconfig').setup {
-        ensure_installed = { 'lua_ls', 'rust_analyzer', 'ts_ls' },
-        automatic_enable = false, -- we'll enable explicitly to ensure our overrides apply
+        ensure_installed = { 'lua_ls', 'rust_analyzer', 'ts_ls', 'pyright' },
+        -- Optional: Install these only if you need them (requires Go, C++ toolchain, Java SDK)
+        -- Add 'gopls', 'clangd', 'jdtls' to ensure_installed if needed
+        handlers = {
+          -- Default handler - will setup all servers with defaults
+          function(server_name)
+            -- Check both servers and optional_servers for custom config
+            if all_servers[server_name] then
+              require('lspconfig')[server_name].setup(all_servers[server_name])
+            else
+              -- Otherwise, setup with just capabilities
+              require('lspconfig')[server_name].setup {
+                capabilities = capabilities,
+              }
+            end
+          end,
+        },
       }
-
-      -- Enable servers (new API) — replaces require('lspconfig')[name].setup(...)
-      for name, _ in pairs(servers) do
-        vim.lsp.enable(name)
-      end
     end,
   },
   {
@@ -390,6 +467,13 @@ require('lazy').setup({
         lua = { 'stylua' },
         python = { 'isort', 'ruff' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        go = { 'gofumpt', 'goimports' },
+        cpp = { 'clang-format' },
+        c = { 'clang-format' },
+        java = { 'google-java-format' },
       },
     },
   },
@@ -551,6 +635,7 @@ require('lazy').setup({
       ensure_installed = {
         'bash',
         'c',
+        'cpp',
         'diff',
         'html',
         'lua',
@@ -562,6 +647,7 @@ require('lazy').setup({
         'javascript',
         'typescript',
         'java',
+        'go',
       },
       auto_install = true,
       highlight = {
