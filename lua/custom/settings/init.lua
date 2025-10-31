@@ -30,6 +30,13 @@ vim.defer_fn(function()
   vim.opt.clipboard = 'unnamedplus'
 end, 100)
 
+-- Get path of current buffer and copy it to clipboard
+vim.keymap.set('n', '<leader>cr', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path) -- copy to system clipboard
+  print('Copied path to clipboard: ' .. path)
+end, { desc = 'Copy full path of current file to clipboard' })
+
 vim.api.nvim_create_autocmd({ 'BufEnter', 'FocusGained' }, {
   callback = function()
     vim.opt.clipboard = 'unnamedplus'
