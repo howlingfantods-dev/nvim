@@ -5,6 +5,10 @@ vim.keymap.set('n', '<leader>ww', function()
   vim.cmd 'ObsidianQuickSwitch Main'
 end, { desc = 'Quick switch to Main' })
 
+vim.keymap.set('n', '<leader><CR>', function()
+  require('obsidian').commands.toggle_checkbox()
+end, { desc = 'Toggle checkbox' })
+
 local function create_leetcode_problem()
   -- Prompt for problem number
   vim.ui.input({ prompt = 'Enter LeetCode problem number: ' }, function(problem_id)
@@ -94,8 +98,8 @@ return {
   opts = {
     workspaces = {
       {
-        name = 'stream',
-        path = '~/Vaults/stream/',
+        name = 'personal',
+        path = '~/Vaults/personal/',
       },
       {
         name = 'software-and-game-development',
