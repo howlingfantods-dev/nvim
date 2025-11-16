@@ -10,7 +10,6 @@ return {
   dependencies = {
     'nvim-lua/plenary.nvim',
   },
-
   config = function()
     local obsidian = require 'obsidian'
     local curl = require 'plenary.curl'
