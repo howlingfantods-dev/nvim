@@ -1,12 +1,5 @@
 return {
   {
-    'nvimtools/none-ls.nvim',
-    event = 'VeryLazy',
-    opts = function()
-      return require 'custom.config.null-ls'
-    end,
-  },
-  {
     'windwp/nvim-ts-autotag',
     ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     config = function()

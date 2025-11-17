@@ -52,7 +52,24 @@ end, { desc = 'Open ~/.zshrc' })
 vim.opt.conceallevel = 1
 
 -- ----- Custom "gf" Behavior -----
--- Map 'gf' to open URLs or local files (you likely have OpenFileOrURL() defined elsewhere).
+-- Map 'gf' to open URLs or local files
+function OpenFileOrURL()
+  local word = vim.fn.expand '<cfile>'
+  if word == '' then
+    return
+  end
+
+  -- Check if it's a URL
+  if word:match '^https?://' or word:match '^ftp://' then
+    -- Open URL in default browser
+    local cmd = 'open ' .. vim.fn.shellescape(word)
+    vim.fn.system(cmd)
+  else
+    -- Try to open as file (default gf behavior)
+    vim.cmd('normal! gf')
+  end
+end
+
 vim.api.nvim_set_keymap('n', 'gf', ':lua OpenFileOrURL()<CR>', { noremap = true, silent = true })
 
 -- ----- Utility Keymaps -----
